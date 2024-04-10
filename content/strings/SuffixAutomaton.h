@@ -14,7 +14,7 @@ using namespace std;
  * If you need suffix tree, use suffix links in SA for reversed string.
  * Status: tested on some string problems
  */
- struct state {
+struct state {
     int len, link;
     map<char, int> next;
     state() : len(0), link(-1) {}
@@ -25,7 +25,7 @@ struct suffix_automaton {
 	int last, size;
 	vi top; vector<ll> cnt; vector<bool> odw; 
 	suffix_automaton(const string &s) : input(s), last(0), size(1) {
-		st.pb(state());
+		st.push_back(state());
 		trav(c, s) add_letter(c);
 		init();
 	}
@@ -33,7 +33,7 @@ struct suffix_automaton {
 		odw[x] = 1;
 		for (auto [lett, node] : st[x].next)
 			if (!odw[node]) dfs(node);
-		top.pb(x);
+		top.push_back(x);
 	}
 	void init() {
 		int p = last;
@@ -48,7 +48,7 @@ struct suffix_automaton {
 		}
 	}
 	void add_letter(char c) {
-		st.pb(state());
+		st.push_back(state());
 		int cur = size++;
 		st[cur].len = st[last].len + 1;
 		int p = last;
@@ -63,7 +63,7 @@ struct suffix_automaton {
 			if (st[p].len + 1 == st[q].len) {
 				st[cur].link = q;
 			} else {
-				st.pb(state());
+				st.push_back(state());
 				int clone = size++;
 				st[clone].len = st[p].len + 1;
 				st[clone].next = st[q].next;
@@ -86,4 +86,22 @@ struct suffix_automaton {
 		return q;
 	}
 	ll count_occs(string &s) { return cnt[search(s)]; }
+	string lcs(const string &T) {
+		int v = 0, l = 0, best = 0, bestpos = 0;
+		rep(i, 0, sz(T)) {
+			while (v && !st[v].next.count(T[i])) {
+				v = st[v].link;
+				l = st[v].len;
+			}
+			if (st[v].next.count(T[i])) {
+				v = st [v].next[T[i]];
+				l++;
+			}
+			if (l > best) {
+				best = l;
+				bestpos = i;
+			}
+		}
+		return T.substr(bestpos - best + 1, best);
+	}
 };
